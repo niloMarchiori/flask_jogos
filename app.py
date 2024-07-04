@@ -1,12 +1,15 @@
 from flask import Flask,render_template, request, redirect, session, flash, url_for
 from models.jogos import *
+from models.usuarios import *
 
 cs=Jogo('CS','FPS','PC')
 valorant=Jogo('Valorant','FPS','PC')
 
+usuario1=Usuarios('Nilo','river','1234')
+usuario2=Usuarios('Luana','lua','abcd')
+
 app=Flask(__name__)
 app.secret_key='alura'
-
 
 @app.route('/')
 def index():
@@ -34,11 +37,13 @@ def login():
 
 @app.route('/autenticar', methods=['POST'])
 def autenticar():
-    if 'Senha'==request.form['senha']:
-        session['usuario_logado']=request.form['usuario']
-        flash('Usuario logado com sucesso')
-        proxima_pagina=request.form['proxima']
-        return redirect(proxima_pagina)
+    if request.form['usuario'] in Usuarios.usuarios:
+        usuario=Usuarios.usuarios[request.form['usuario']]
+        if usuario.senha==request.form['senha']:
+            session['usuario_logado']=request.form['usuario']
+            flash(f'{usuario.nickname} logado com sucesso')
+            proxima_pagina=request.form['proxima']
+            return redirect(proxima_pagina)
     else:
         flash('Usuário não logado')
         return redirect(url_for('login'))
